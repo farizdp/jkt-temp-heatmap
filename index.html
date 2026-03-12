@@ -5,462 +5,601 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jakarta Temperature Heatmap</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         :root {
-            --ivory: #fffff0;
-            --cream: #faf8f3;
-            --charcoal: #2d2d2d;
-            --slate: #5a5a5a;
-            --whisper: #9ca3af;
-            --accent: #3b82f6;
-            --border-light: rgba(0, 0, 0, 0.06);
-            --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.05);
-            --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --bg: #f0ede8;
+            --surface: #ffffff;
+            --ink: #1a1a1a;
+            --ink-light: #6b6b6b;
+            --ink-faint: #a3a3a3;
+            --border: rgba(0, 0, 0, 0.08);
+            --accent: #2563eb;
+            --radius: 16px;
+            --font-display: 'DM Serif Display', serif;
+            --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
+            --font-mono: 'IBM Plex Mono', monospace;
         }
-        
+
         body {
-            font-family: 'Work Sans', -apple-system, sans-serif;
-            background: linear-gradient(180deg, var(--ivory) 0%, var(--cream) 100%);
-            color: var(--charcoal);
-            line-height: 1.7;
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--ink);
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        
-        .container {
-            max-width: 1680px;
+
+        /* ── Layout ── */
+        .page {
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 4rem 2rem;
+            padding: 3rem 2.5rem 4rem;
         }
-        
-        /* Header */
+
+        /* ── Header ── */
         .header {
-            text-align: center;
-            margin-bottom: 4rem;
-            animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        
-        .header h1 {
-            font-family: 'Crimson Pro', serif;
-            font-size: clamp(2.5rem, 6vw, 5rem);
-            font-weight: 300;
-            letter-spacing: -0.03em;
-            margin-bottom: 0.75rem;
-            background: linear-gradient(135deg, var(--charcoal) 0%, var(--slate) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .header .subtitle {
-            font-size: 1.125rem;
-            color: var(--slate);
-            font-weight: 400;
-            letter-spacing: 0.02em;
-        }
-        
-        .header .period {
-            display: inline-block;
-            margin-top: 0.5rem;
-            padding: 0.5rem 1.25rem;
-            background: rgba(59, 130, 246, 0.08);
-            border-radius: 100px;
-            font-size: 0.875rem;
-            color: var(--accent);
-            font-weight: 500;
-        }
-        
-        /* Controls */
-        .controls {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border-light);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 3rem;
-            box-shadow: var(--shadow-soft);
-            animation: fadeIn 0.8s ease 0.2s backwards;
-        }
-        
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .control {
             display: flex;
-            flex-direction: column;
-            gap: 0.625rem;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
-        
-        .control label {
-            font-size: 0.8125rem;
+
+        .header-title {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .header-title h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4.5vw, 3.5rem);
+            font-weight: 400;
+            line-height: 1.1;
+            letter-spacing: -0.01em;
+            color: var(--ink);
+        }
+
+        .header-title .tagline {
+            margin-top: 0.5rem;
+            font-size: 0.9375rem;
+            color: var(--ink-light);
+            font-weight: 400;
+        }
+
+        .header-title .tagline span {
+            display: inline-block;
+            margin-left: 0.5rem;
+            padding: 0.2rem 0.7rem;
+            background: var(--ink);
+            color: var(--bg);
+            border-radius: 100px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            vertical-align: middle;
+        }
+
+        /* ── Controls ── */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-size: 0.75rem;
             font-weight: 600;
-            color: var(--slate);
             text-transform: uppercase;
             letter-spacing: 0.08em;
+            color: var(--ink-faint);
+            white-space: nowrap;
         }
-        
-        .control select,
-        .control input {
-            padding: 0.875rem 1rem;
-            border: 1.5px solid var(--border-light);
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 1rem;
-            background: white;
-            color: var(--charcoal);
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            appearance: none;
-        }
-        
-        .control select {
-            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%235a5a5a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            padding-right: 2.5rem;
-        }
-        
-        .control select:hover,
-        .control input:hover {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.05);
-        }
-        
-        .control select:focus,
-        .control input:focus {
+
+        .control-group select,
+        .control-group input[type="number"] {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--ink);
             outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            min-width: 0;
+        }
+
+        .control-group input[type="number"] {
+            width: 5.5rem;
+            -moz-appearance: textfield;
+        }
+
+        .control-group input[type="number"]::-webkit-inner-spin-button,
+        .control-group input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+        }
+
+        .control-group select {
+            appearance: none;
+            padding-right: 2rem;
+            background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b6b6b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+        }
+
+        .control-group select:hover,
+        .control-group input:hover {
+            border-color: var(--ink-faint);
+        }
+
+        .control-group select:focus,
+        .control-group input:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
-        
-        /* Calendar */
-        .calendar-section {
-            background: white;
-            border-radius: 24px;
-            padding: 3rem;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid var(--border-light);
-            animation: fadeIn 0.8s ease 0.4s backwards;
+
+        .control-sep {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
         }
-        
+
+        .save-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            background: var(--ink);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+            white-space: nowrap;
+        }
+
+        .save-btn:hover { opacity: 0.8; }
+        .save-btn:active { transform: scale(0.96); }
+
+        .save-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ── Calendar Card ── */
+        .calendar-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.04);
+            opacity: 0;
+            animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+        }
+
         .calendar-scroll {
             overflow-x: auto;
             overflow-y: hidden;
-            margin: -1rem;
-            padding: 1rem;
+            margin: -0.5rem;
+            padding: 0.5rem;
         }
-        
+
+        .calendar-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .calendar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .calendar-scroll::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
         .calendar {
-            min-width: 100%;
             display: inline-block;
+            min-width: 100%;
         }
-        
+
+        /* ── Year Header ── */
         .year-header {
             display: flex;
-            margin-bottom: 1.5rem;
-            padding-left: 140px;
-            gap: 0.5rem;
+            padding-left: 80px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
-        
+
         .year-label {
             flex: 1;
+            min-width: 0;
             text-align: center;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--charcoal);
-            letter-spacing: 0.05em;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--ink);
+            letter-spacing: 0.02em;
             opacity: 0;
             animation: fadeIn 0.4s ease forwards;
         }
-        
+
+        /* ── Month Rows ── */
         .month-row {
             display: flex;
-            align-items: center;
-            margin-bottom: 4px;
+            align-items: flex-start;
+            margin-bottom: 6px;
             opacity: 0;
-            animation: slideRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: slideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
-        
+
         .month-label {
-            width: 140px;
+            width: 80px;
+            min-width: 80px;
             text-align: right;
-            padding-right: 1.5rem;
-            font-size: 0.9375rem;
+            padding-right: 12px;
+            padding-top: 2px;
+            font-size: 0.75rem;
             font-weight: 500;
-            color: var(--slate);
+            color: var(--ink-light);
+            letter-spacing: 0.01em;
         }
-        
-        .year-grid {
+
+        .month-years {
+            display: flex;
+            gap: 8px;
             flex: 1;
-            display: grid;
-            grid-template-columns: repeat(31, 1fr);
-            gap: 2px;
+            min-width: 0;
         }
-        
+
+        /* ── Day Grid (7-col weekday calendar) ── */
+        .year-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1.5px;
+            flex: 1;
+            min-width: 0;
+        }
+
         .day {
             aspect-ratio: 1;
-            border-radius: 3px;
+            border-radius: 2px;
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
             position: relative;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
         }
-        
+
         .day:not(.empty):hover {
-            transform: scale(1.4);
+            transform: scale(1.6);
             z-index: 100;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
-            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
         }
-        
+
         .day.empty {
             opacity: 0;
             pointer-events: none;
         }
-        
-        /* Tooltip */
+
+        /* ── Tooltip ── */
         .tooltip {
             position: fixed;
-            background: rgba(45, 45, 45, 0.98);
-            backdrop-filter: blur(12px);
-            color: white;
-            padding: 1rem 1.25rem;
-            border-radius: 12px;
-            font-size: 0.9375rem;
+            background: var(--ink);
+            color: var(--bg);
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            font-size: 0.8125rem;
             pointer-events: none;
             z-index: 1000;
             opacity: 0;
-            transform: translateY(-8px);
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24);
-            max-width: 280px;
+            transform: translateY(-6px);
+            transition: opacity 0.2s, transform 0.2s;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+            max-width: 240px;
+            line-height: 1.4;
         }
-        
+
         .tooltip.visible {
             opacity: 1;
             transform: translateY(0);
         }
-        
+
         .tooltip-date {
             font-weight: 600;
-            margin-bottom: 0.375rem;
-            letter-spacing: 0.01em;
+            font-size: 0.75rem;
+            letter-spacing: 0.02em;
+            margin-bottom: 0.25rem;
+            opacity: 0.7;
         }
-        
+
         .tooltip-temp {
-            color: #93c5fd;
-            font-size: 1.5rem;
-            font-weight: 600;
-            font-family: 'Crimson Pro', serif;
+            font-family: var(--font-mono);
+            font-size: 1.25rem;
+            font-weight: 500;
         }
-        
-        /* Legend */
+
+        /* ── Legend ── */
         .legend {
             display: flex;
             justify-content: center;
-            gap: 2rem;
-            margin-top: 3rem;
-            padding-top: 2.5rem;
-            border-top: 1px solid var(--border-light);
+            align-items: center;
+            gap: 1.25rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
             flex-wrap: wrap;
         }
-        
+
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 0.625rem;
+            gap: 0.375rem;
             opacity: 0;
             animation: fadeIn 0.4s ease forwards;
         }
-        
+
         .legend-swatch {
-            width: 36px;
-            height: 16px;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
         }
-        
+
         .legend-label {
-            font-size: 0.875rem;
-            color: var(--slate);
-            font-weight: 500;
+            font-family: var(--font-mono);
+            font-size: 0.6875rem;
+            color: var(--ink-light);
+            font-weight: 400;
         }
-        
-        /* Footer */
+
+        /* ── Footer ── */
         .footer {
             text-align: center;
-            margin-top: 4rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-light);
-            color: var(--whisper);
-            font-size: 0.875rem;
-            animation: fadeIn 1s ease 0.8s backwards;
+            margin-top: 2.5rem;
+            font-size: 0.75rem;
+            color: var(--ink-faint);
+            letter-spacing: 0.02em;
+            opacity: 0;
+            animation: fadeIn 0.6s ease 0.6s forwards;
         }
-        
-        /* Animations */
+
+        .footer a {
+            color: var(--ink-light);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border);
+            transition: border-color 0.2s;
+        }
+
+        .footer a:hover {
+            border-color: var(--ink-light);
+        }
+
+        /* ── Animations ── */
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideRight {
-            from { opacity: 0; transform: translateX(-20px); }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-12px); }
             to { opacity: 1; transform: translateX(0); }
         }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 2rem 1rem;
+
+        /* Stagger year labels */
+        .year-label:nth-child(1) { animation-delay: 0.05s; }
+        .year-label:nth-child(2) { animation-delay: 0.08s; }
+        .year-label:nth-child(3) { animation-delay: 0.11s; }
+        .year-label:nth-child(4) { animation-delay: 0.14s; }
+        .year-label:nth-child(5) { animation-delay: 0.17s; }
+        .year-label:nth-child(6) { animation-delay: 0.20s; }
+        .year-label:nth-child(7) { animation-delay: 0.23s; }
+        .year-label:nth-child(8) { animation-delay: 0.26s; }
+        .year-label:nth-child(9) { animation-delay: 0.29s; }
+        .year-label:nth-child(10) { animation-delay: 0.32s; }
+        .year-label:nth-child(11) { animation-delay: 0.35s; }
+
+        /* Stagger month rows */
+        .month-row:nth-child(2) { animation-delay: 0.05s; }
+        .month-row:nth-child(3) { animation-delay: 0.08s; }
+        .month-row:nth-child(4) { animation-delay: 0.11s; }
+        .month-row:nth-child(5) { animation-delay: 0.14s; }
+        .month-row:nth-child(6) { animation-delay: 0.17s; }
+        .month-row:nth-child(7) { animation-delay: 0.20s; }
+        .month-row:nth-child(8) { animation-delay: 0.23s; }
+        .month-row:nth-child(9) { animation-delay: 0.26s; }
+        .month-row:nth-child(10) { animation-delay: 0.29s; }
+        .month-row:nth-child(11) { animation-delay: 0.32s; }
+        .month-row:nth-child(12) { animation-delay: 0.35s; }
+        .month-row:nth-child(13) { animation-delay: 0.38s; }
+
+        /* Stagger legend */
+        .legend-item:nth-child(1) { animation-delay: 0.4s; }
+        .legend-item:nth-child(2) { animation-delay: 0.43s; }
+        .legend-item:nth-child(3) { animation-delay: 0.46s; }
+        .legend-item:nth-child(4) { animation-delay: 0.49s; }
+        .legend-item:nth-child(5) { animation-delay: 0.52s; }
+        .legend-item:nth-child(6) { animation-delay: 0.55s; }
+        .legend-item:nth-child(7) { animation-delay: 0.58s; }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .page {
+                padding: 2rem 1.25rem 3rem;
             }
-            
-            .header h1 {
-                font-size: 2.5rem;
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.25rem;
             }
-            
-            .controls-grid {
-                grid-template-columns: 1fr;
+
+            .controls {
+                width: 100%;
             }
-            
-            .calendar-section {
+
+            .control-sep {
+                display: none;
+            }
+
+            .calendar-card {
                 padding: 1.5rem;
+                border-radius: 12px;
             }
         }
-        
-        /* Stagger animations */
-        .year-label:nth-child(1) { animation-delay: 0.1s; }
-        .year-label:nth-child(2) { animation-delay: 0.15s; }
-        .year-label:nth-child(3) { animation-delay: 0.2s; }
-        .year-label:nth-child(4) { animation-delay: 0.25s; }
-        .year-label:nth-child(5) { animation-delay: 0.3s; }
-        .year-label:nth-child(6) { animation-delay: 0.35s; }
-        .year-label:nth-child(7) { animation-delay: 0.4s; }
-        .year-label:nth-child(8) { animation-delay: 0.45s; }
-        .year-label:nth-child(9) { animation-delay: 0.5s; }
-        .year-label:nth-child(10) { animation-delay: 0.55s; }
-        .year-label:nth-child(11) { animation-delay: 0.6s; }
-        
-        .month-row:nth-child(1) { animation-delay: 0.1s; }
-        .month-row:nth-child(2) { animation-delay: 0.15s; }
-        .month-row:nth-child(3) { animation-delay: 0.2s; }
-        .month-row:nth-child(4) { animation-delay: 0.25s; }
-        .month-row:nth-child(5) { animation-delay: 0.3s; }
-        .month-row:nth-child(6) { animation-delay: 0.35s; }
-        .month-row:nth-child(7) { animation-delay: 0.4s; }
-        .month-row:nth-child(8) { animation-delay: 0.45s; }
-        .month-row:nth-child(9) { animation-delay: 0.5s; }
-        .month-row:nth-child(10) { animation-delay: 0.55s; }
-        .month-row:nth-child(11) { animation-delay: 0.6s; }
-        .month-row:nth-child(12) { animation-delay: 0.65s; }
-        
-        .legend-item:nth-child(1) { animation-delay: 0.7s; }
-        .legend-item:nth-child(2) { animation-delay: 0.75s; }
-        .legend-item:nth-child(3) { animation-delay: 0.8s; }
-        .legend-item:nth-child(4) { animation-delay: 0.85s; }
-        .legend-item:nth-child(5) { animation-delay: 0.9s; }
-        .legend-item:nth-child(6) { animation-delay: 0.95s; }
-        .legend-item:nth-child(7) { animation-delay: 1s; }
+
+        @media (max-width: 600px) {
+            .page {
+                padding: 1.5rem 1rem 2.5rem;
+            }
+
+            .header-title h1 {
+                font-size: 1.75rem;
+            }
+
+            .controls {
+                gap: 0.625rem;
+            }
+
+            .control-group {
+                flex: 1;
+                min-width: calc(50% - 0.5rem);
+            }
+
+            .control-group select,
+            .control-group input[type="number"] {
+                width: 100%;
+            }
+
+            .save-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .calendar-card {
+                padding: 1rem;
+            }
+
+            .legend {
+                gap: 0.75rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container" id="app">
+    <div class="page" id="app">
         <div class="header">
-            <h1>Jakarta Climate</h1>
-            <p class="subtitle">Visualizing daily temperature patterns across a decade</p>
-            <span class="period" id="dataPeriod">2015 – 2025</span>
-        </div>
-        
-        <div class="controls">
-            <div class="controls-grid">
-                <div class="control">
-                    <label for="startYear">Start Year</label>
+            <div class="header-title">
+                <h1>Jakarta's Weather<br>Over the Years</h1>
+                <p class="tagline">Daily temperature patterns <span id="dataPeriod">2015 – 2025</span></p>
+            </div>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="startYear">Start</label>
                     <input type="number" id="startYear" value="2015" min="2015" max="2025">
                 </div>
-                <div class="control">
-                    <label for="endYear">End Year</label>
+                <div class="control-group">
+                    <label for="endYear">End</label>
                     <input type="number" id="endYear" value="2025" min="2015" max="2025">
                 </div>
-                <div class="control">
-                    <label for="tempType">Temperature Type</label>
+                <div class="control-sep"></div>
+                <div class="control-group">
+                    <label for="tempType">Type</label>
                     <select id="tempType">
-                        <option value="tavg">Average Temperature</option>
-                        <option value="tmax">Maximum Temperature</option>
-                        <option value="tmin">Minimum Temperature</option>
+                        <option value="tavg">Average</option>
+                        <option value="tmax">Maximum</option>
+                        <option value="tmin">Minimum</option>
                     </select>
                 </div>
-                <div class="control">
+                <div class="control-group">
                     <label for="unit">Unit</label>
                     <select id="unit">
-                        <option value="C">Celsius (°C)</option>
-                        <option value="F">Fahrenheit (°F)</option>
+                        <option value="C">°C</option>
+                        <option value="F">°F</option>
                     </select>
                 </div>
+                <div class="control-sep"></div>
+                <button class="save-btn" id="saveBtn">
+                    <svg viewBox="0 0 16 16" fill="none"><path d="M8 2v8m0 0L5 7m3 3l3-3M3 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Save
+                </button>
             </div>
         </div>
-        
-        <div class="calendar-section">
+
+        <div class="calendar-card" id="calendarCard">
             <div class="calendar-scroll">
                 <div class="calendar" id="calendar"></div>
             </div>
             <div class="legend" id="legend"></div>
         </div>
-        
+
         <div class="footer">
-            <p>Weather data visualization • Built with D3.js • Data: 2015–2025</p>
+            <p>Built with D3.js · Using data from <a href="https://meteostat.net" target="_blank" rel="noopener">Meteostat</a></p>
         </div>
     </div>
-    
+
     <div class="tooltip" id="tooltip">
         <div class="tooltip-date"></div>
         <div class="tooltip-temp"></div>
     </div>
-    
+
     <script>
-        // Configuration
         const config = {
             startYear: 2015,
             endYear: 2025,
             tempType: 'tavg',
             unit: 'C',
-            months: ['January', 'February', 'March', 'April', 'May', 'June', 
+            months: ['January', 'February', 'March', 'April', 'May', 'June',
                      'July', 'August', 'September', 'October', 'November', 'December'],
             colorScales: {
                 C: {
                     bins: [0, 24, 26, 28, 30, 32, 35],
                     colors: ['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#fee0d2', '#fc9272', '#de2d26'],
-                    labels: ['<24°C', '24-26°C', '26-28°C', '28-30°C', '30-32°C', '32-35°C', '>35°C']
+                    labels: ['<24°C', '24–26°C', '26–28°C', '28–30°C', '30–32°C', '32–35°C', '>35°C']
                 },
                 F: {
                     bins: [0, 75, 79, 82, 86, 90, 95],
                     colors: ['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#fee0d2', '#fc9272', '#de2d26'],
-                    labels: ['<75°F', '75-79°F', '79-82°F', '82-86°F', '86-90°F', '90-95°F', '>95°F']
+                    labels: ['<75°F', '75–79°F', '79–82°F', '82–86°F', '86–90°F', '90–95°F', '>95°F']
                 }
             }
         };
-        
+
         let weatherData = [];
         const tooltip = d3.select('#tooltip');
-        
-        // Helper functions
-        const celsiusToFahrenheit = (c) => c * 9/5 + 32;
-        
+
+        const celsiusToFahrenheit = (c) => c * 9 / 5 + 32;
+
         const getColor = (temp, unit) => {
             if (!temp || isNaN(temp)) return '#f0f0f0';
             const scale = config.colorScales[unit];
@@ -469,10 +608,9 @@
             }
             return scale.colors[0];
         };
-        
+
         const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
-        
-        // Load data
+
         async function loadData() {
             try {
                 const response = await fetch('./jakarta_weather_data.csv');
@@ -483,14 +621,12 @@
                 console.error('Error loading data:', error);
             }
         }
-        
-        // Render calendar
+
         function render() {
             const { startYear, endYear, tempType, unit } = config;
             const years = d3.range(startYear, endYear + 1);
             const scale = config.colorScales[unit];
-            
-            // Prepare data
+
             const dataByDate = new Map();
             weatherData.forEach(row => {
                 if (row.time && row[tempType]) {
@@ -503,39 +639,41 @@
                     }
                 }
             });
-            
-            // Update period
+
             d3.select('#dataPeriod').text(`${startYear} – ${endYear}`);
-            
-            // Render calendar
+
             const calendar = d3.select('#calendar');
             calendar.html('');
-            
-            // Year headers
+
             const yearHeader = calendar.append('div').attr('class', 'year-header');
             years.forEach(year => {
                 yearHeader.append('div')
                     .attr('class', 'year-label')
                     .text(year);
             });
-            
-            // Month rows
+
             config.months.forEach((month, monthIdx) => {
                 const row = calendar.append('div').attr('class', 'month-row');
-                
+
                 row.append('div')
                     .attr('class', 'month-label')
                     .text(month);
-                
+
+                const monthYears = row.append('div').attr('class', 'month-years');
+
                 years.forEach(year => {
-                    const yearGrid = row.append('div').attr('class', 'year-grid');
+                    const yearGrid = monthYears.append('div').attr('class', 'year-grid');
                     const daysInMonth = getDaysInMonth(year, monthIdx);
-                    
-                    // Add days
+                    const firstDayOfWeek = new Date(year, monthIdx, 1).getDay();
+
+                    for (let i = 0; i < firstDayOfWeek; i++) {
+                        yearGrid.append('div').attr('class', 'day empty');
+                    }
+
                     for (let day = 1; day <= daysInMonth; day++) {
                         const dateStr = `${year}-${String(monthIdx + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                         const temp = dataByDate.get(dateStr);
-                        
+
                         yearGrid.append('div')
                             .attr('class', 'day')
                             .style('background-color', getColor(temp, unit))
@@ -544,18 +682,12 @@
                             .on('mousemove', moveTooltip)
                             .on('mouseleave', hideTooltip);
                     }
-                    
-                    // Pad remaining days
-                    for (let day = daysInMonth + 1; day <= 31; day++) {
-                        yearGrid.append('div').attr('class', 'day empty');
-                    }
                 });
             });
-            
-            // Render legend
+
             const legend = d3.select('#legend');
             legend.html('');
-            
+
             scale.colors.forEach((color, i) => {
                 const item = legend.append('div').attr('class', 'legend-item');
                 item.append('div')
@@ -566,72 +698,85 @@
                     .text(scale.labels[i]);
             });
         }
-        
-        // Tooltip functions
+
         function showTooltip(event, d) {
             if (!d.temp) return;
-            
+
             const date = new Date(d.date);
-            const dateStr = date.toLocaleDateString('en-US', { 
+            const dateStr = date.toLocaleDateString('en-US', {
                 weekday: 'short',
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
             });
-            
+
             tooltip.select('.tooltip-date').text(dateStr);
             tooltip.select('.tooltip-temp').text(`${d.temp.toFixed(1)}°${config.unit}`);
             tooltip.classed('visible', true);
             moveTooltip(event);
         }
-        
+
         function moveTooltip(event) {
             const tooltipNode = tooltip.node();
-            const tooltipWidth = tooltipNode.offsetWidth;
-            const tooltipHeight = tooltipNode.offsetHeight;
-            
-            let left = event.clientX + 20;
-            let top = event.clientY + 20;
-            
-            // Keep tooltip in viewport
-            if (left + tooltipWidth > window.innerWidth) {
-                left = event.clientX - tooltipWidth - 20;
-            }
-            if (top + tooltipHeight > window.innerHeight) {
-                top = event.clientY - tooltipHeight - 20;
-            }
-            
+            const tw = tooltipNode.offsetWidth;
+            const th = tooltipNode.offsetHeight;
+
+            let left = event.clientX + 16;
+            let top = event.clientY + 16;
+
+            if (left + tw > window.innerWidth - 8) left = event.clientX - tw - 16;
+            if (top + th > window.innerHeight - 8) top = event.clientY - th - 16;
+
             tooltip
                 .style('left', `${left}px`)
                 .style('top', `${top}px`);
         }
-        
+
         function hideTooltip() {
             tooltip.classed('visible', false);
         }
-        
-        // Event listeners
-        d3.select('#startYear').on('change', function() {
+
+        d3.select('#startYear').on('change', function () {
             config.startYear = +this.value;
             render();
         });
-        
-        d3.select('#endYear').on('change', function() {
+
+        d3.select('#endYear').on('change', function () {
             config.endYear = +this.value;
             render();
         });
-        
-        d3.select('#tempType').on('change', function() {
+
+        d3.select('#tempType').on('change', function () {
             config.tempType = this.value;
             render();
         });
-        
-        d3.select('#unit').on('change', function() {
+
+        d3.select('#unit').on('change', function () {
             config.unit = this.value;
             render();
         });
-        
-        // Initialize
+
+        d3.select('#saveBtn').on('click', async function () {
+            const btn = this;
+            const originalHTML = btn.innerHTML;
+            btn.textContent = 'Saving…';
+            btn.disabled = true;
+            try {
+                const canvas = await html2canvas(document.getElementById('calendarCard'), {
+                    backgroundColor: '#ffffff',
+                    scale: 2
+                });
+                const link = document.createElement('a');
+                link.download = `jakarta-temperature-${config.startYear}-${config.endYear}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (err) {
+                console.error('Save failed:', err);
+            }
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        });
+
         loadData();
     </script>
 </body>
