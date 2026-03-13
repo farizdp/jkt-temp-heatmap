@@ -364,9 +364,9 @@
             justify-content: center;
             align-items: center;
             gap: 1.25rem;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border);
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
             flex-wrap: wrap;
         }
 
@@ -643,10 +643,10 @@
         </div>
 
         <div class="calendar-card" id="calendarCard">
+            <div class="legend" id="legend"></div>
             <div class="calendar-scroll">
                 <div class="calendar" id="calendar"></div>
             </div>
-            <div class="legend" id="legend"></div>
         </div>
 
         <div class="insights-section">
@@ -877,10 +877,30 @@
             btn.textContent = 'Saving…';
             btn.disabled = true;
             try {
-                const canvas = await html2canvas(document.getElementById('calendarCard'), {
-                    backgroundColor: '#ffffff',
-                    scale: 2
+                const card = document.getElementById('calendarCard');
+                const scroll = card.querySelector('.calendar-scroll');
+
+                // Temporarily disable overflow and animations for capture
+                scroll.style.overflow = 'visible';
+                card.querySelectorAll('.legend-item, .month-row, .year-label').forEach(el => {
+                    el.style.opacity = '1';
+                    el.style.animation = 'none';
                 });
+
+                const canvas = await html2canvas(card, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    scrollX: 0,
+                    scrollY: -window.scrollY
+                });
+
+                // Restore styles
+                scroll.style.overflow = '';
+                card.querySelectorAll('.legend-item, .month-row, .year-label').forEach(el => {
+                    el.style.opacity = '';
+                    el.style.animation = '';
+                });
+
                 const link = document.createElement('a');
                 link.download = `jakarta-temperature-${config.startYear}-${config.endYear}.png`;
                 link.href = canvas.toDataURL('image/png');
