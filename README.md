@@ -24,12 +24,12 @@ pip install meteostat pandas matplotlib numpy
 
 ## Data
 
-| Field | Detail |
-|-------|--------|
-| Source | Meteostat — Jakarta Observatory, station 96745 |
-| Period | 2015-01-01 to 2025-12-31 |
+| Field   | Detail                                                 |
+| ------- | ------------------------------------------------------ |
+| Source  | Meteostat — Jakarta Observatory, station 96745         |
+| Period  | 2015-01-01 to 2025-12-31                               |
 | Columns | `tavg`, `tmin`, `tmax` (daily temperatures in Celsius) |
-| Climate | Tropical Rainforest (Af), decade average 28.6°C |
+| Climate | Tropical Rainforest (Af), decade average 28.6°C        |
 
 ## Features
 
@@ -41,17 +41,23 @@ pip install meteostat pandas matplotlib numpy
 
 ## Temperature Scale (Tropical)
 
-| Range | Label |
-|-------|-------|
-| Below 24°C | Cool |
-| 24–26°C | Comfortably Cool |
-| 26–28°C | Comfortable |
-| 28–30°C | Comfortably Warm |
-| 30–32°C | Hot |
-| 32–35°C | Very Hot |
-| Above 35°C | Extreme |
+| Range      | Label            |
+| ---------- | ---------------- |
+| Below 24°C | Cool             |
+| 24–26°C    | Comfortably Cool |
+| 26–28°C    | Comfortable      |
+| 28–30°C    | Comfortably Warm |
+| 30–32°C    | Hot              |
+| 32–35°C    | Very Hot         |
+| Above 35°C | Extreme          |
 
 Based on Indonesian thermal comfort studies and the Köppen climate classification.
+
+## Online Tools
+
+- Color Brewer: https://colorbrewer2.org/ (colorblind-safe palettes)
+- Climate Data: https://www.meteostat.net/
+- Köppen Classification: https://en.wikipedia.org/wiki/Köppen_climate_classification
 
 ## Credits
 
