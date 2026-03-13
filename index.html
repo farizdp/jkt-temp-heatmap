@@ -413,6 +413,67 @@
             border-color: var(--ink-light);
         }
 
+        /* ── Insights ── */
+        .insights-section {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.04);
+            opacity: 0;
+            animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+        }
+
+        .insights-section h2 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 400;
+            margin-bottom: 0.25rem;
+        }
+
+        .insights-subtitle {
+            color: var(--ink-light);
+            font-size: 0.9375rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .insight-card {
+            padding: 1.25rem;
+            border-radius: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+        }
+
+        .insight-number {
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--ink);
+            margin-bottom: 0.125rem;
+        }
+
+        .insight-label {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--ink-faint);
+            margin-bottom: 0.625rem;
+        }
+
+        .insight-body {
+            font-size: 0.875rem;
+            line-height: 1.55;
+            color: var(--ink-light);
+        }
+
         /* ── Animations ── */
         @keyframes rise {
             from { opacity: 0; transform: translateY(16px); }
@@ -489,6 +550,10 @@
                 padding: 1.5rem;
                 border-radius: 12px;
             }
+
+            .insights-section {
+                padding: 1.5rem;
+            }
         }
 
         @media (max-width: 600px) {
@@ -520,6 +585,14 @@
             }
 
             .calendar-card {
+                padding: 1rem;
+            }
+
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .insights-section {
                 padding: 1rem;
             }
 
@@ -576,8 +649,35 @@
             <div class="legend" id="legend"></div>
         </div>
 
+        <div class="insights-section">
+            <h2>Key Insights</h2>
+            <p class="insights-subtitle">What a decade of Jakarta's temperature data reveals</p>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-number">28.6°C</div>
+                    <div class="insight-label">Decade Average</div>
+                    <div class="insight-body">Jakarta's average temperature held steady at 28.6°C across 2015–2025, ranging from daily lows of 19.8°C to peaks of 36.8°C — a consistently tropical profile.</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-number">+0.7°C</div>
+                    <div class="insight-label">Dry vs. Wet Season</div>
+                    <div class="insight-body">The dry season (April–October) averages 28.9°C, while the wet season (November–March) drops to 28.2°C. October and May are the warmest months.</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-number">29.2°C</div>
+                    <div class="insight-label">2024 — Hottest Year</div>
+                    <div class="insight-body">2024 set the decade record at 29.15°C average, followed closely by 2023 at 29.01°C — both likely amplified by El Niño conditions.</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-number">36.8°C</div>
+                    <div class="insight-label">All-Time Maximum</div>
+                    <div class="insight-body">Recorded on September 29, 2023. Peak daily maximums have risen from around 35°C in 2015–2017 to over 36.5°C in recent years.</div>
+                </div>
+            </div>
+        </div>
+
         <div class="footer">
-            <p>Built with D3.js · Using data from <a href="https://meteostat.net" target="_blank" rel="noopener">Meteostat</a></p>
+            <p>Built with D3.js · Using data from <a href="https://meteostat.net" target="_blank" rel="noopener">Meteostat</a> · <a href="https://github.com/farizdp/city-temp-heatmap" target="_blank" rel="noopener">GitHub</a></p>
         </div>
     </div>
 

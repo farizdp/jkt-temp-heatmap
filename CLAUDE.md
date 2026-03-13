@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `index.html` — Main app: D3.js single-file app with editorial design (inline CSS + JS, no build step)
 - `jakarta_weather_data.csv` — Source weather data (tavg/tmin/tmax columns, daily 2015–2025)
-- `jakarta_weather_notebook.ipynb` — Jupyter/matplotlib analysis (can regenerate static PNGs)
+- `jakarta_weather_notebook.ipynb` — Jupyter notebook for data fetching and analysis
 - `README.md` — Documentation
 
 ## Architecture
