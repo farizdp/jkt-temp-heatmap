@@ -39,6 +39,32 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
+        /* ── Back Link ── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.3rem 0.85rem;
+            margin-bottom: 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--ink-light);
+            text-decoration: none;
+            letter-spacing: 0.01em;
+            transition: border-color 0.2s, color 0.2s;
+            opacity: 0;
+            animation: fadeIn 0.4s ease 0.1s forwards;
+        }
+
+        .back-link:hover {
+            border-color: var(--ink-faint);
+            color: var(--ink);
+        }
+
         /* ── Layout ── */
         .page {
             max-width: 1600px;
@@ -604,6 +630,7 @@
 </head>
 <body>
     <div class="page" id="app">
+        <a href="https://lab.fariz.id" class="back-link">← lab.fariz.id</a>
         <div class="header">
             <div class="header-title">
                 <h1>Jakarta's Temperature<br>Over the Years</h1>
@@ -677,7 +704,7 @@
         </div>
 
         <div class="footer">
-            <p>Built with D3.js · Using data from <a href="https://meteostat.net" target="_blank" rel="noopener">Meteostat</a> · <a href="https://github.com/farizdp/city-temp-heatmap" target="_blank" rel="noopener">GitHub</a></p>
+            <p>Built with D3.js · Using data from <a href="https://meteostat.net" target="_blank" rel="noopener">Meteostat</a> · <a href="https://github.com/farizdp/jkt-temp-heatmap" target="_blank" rel="noopener">GitHub</a></p>
         </div>
     </div>
 
