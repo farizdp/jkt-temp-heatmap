@@ -752,13 +752,25 @@
         const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
 
         async function loadData() {
+            const primaryUrl = 'https://cdn.jsdelivr.net/gh/farizdp/web-data-store@main/lab-fariz-id/jkt-temp-heatmap/jakarta_weather_data.csv';
+            const backupUrl = 'https://raw.githubusercontent.com/farizdp/web-data-store/main/lab-fariz-id/jkt-temp-heatmap/jakarta_weather_data.csv';
             try {
-                const response = await fetch('./jakarta_weather_data.csv');
+                let response = await fetch(primaryUrl);
+                if (!response.ok) {
+                    response = await fetch(backupUrl);
+                }
                 const csvText = await response.text();
                 weatherData = d3.csvParse(csvText);
                 render();
             } catch (error) {
-                console.error('Error loading data:', error);
+                try {
+                    const response = await fetch(backupUrl);
+                    const csvText = await response.text();
+                    weatherData = d3.csvParse(csvText);
+                    render();
+                } catch (backupError) {
+                    console.error('Error loading data:', backupError);
+                }
             }
         }
 
